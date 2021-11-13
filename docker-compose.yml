@@ -1,0 +1,43 @@
+version: "3.0"
+
+services:
+  apiprodutos:
+    container_name: apiprodutos
+    command: npm run dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    volumes:
+      - .:/home/node/apiprodutos
+      - /home/node/apiprodutos/node_modules
+    environment:
+      - DB_HOST=$DB_HOST
+      - DB_PORT=$DB_PORT
+      - DB_NAME=$DB_NAME
+    entrypoint:
+      - /bin/sh
+      - ./init.sh
+    depends_on:
+      - dbmongo
+    networks:
+      - api-connection
+    ports:
+      - 3001:3001
+
+  dbmongo:
+    container_name: dbmongo
+    image: mongo
+    restart: unless-stopped
+    environment:
+      - DB_HOST=$DB_HOST
+      - DB_PORT=$DB_PORT
+      - DB_NAME=$DB_NAME
+    ports:
+      - 27017:27017
+    volumes:
+      - ./dbmongo-data:/data
+
+networks:
+  api-connection:
+    driver: bridge
